@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             plnMain = new Panel();
             pnlResult = new Panel();
             lblLastRefreshed = new Label();
@@ -37,15 +38,19 @@
             lblStocksISA = new Label();
             pnlValue = new Panel();
             lblValue = new Label();
+            contextMenu = new ContextMenuStrip(components);
+            settingsMenuItem = new ToolStripMenuItem();
+            closeMenuItem = new ToolStripMenuItem();
             plnMain.SuspendLayout();
             pnlResult.SuspendLayout();
             pnlHeader.SuspendLayout();
             pnlValue.SuspendLayout();
+            contextMenu.SuspendLayout();
             SuspendLayout();
             // 
             // plnMain
             // 
-            plnMain.BackColor = SystemColors.ControlDarkDark;
+            plnMain.BackColor = Color.Black;
             plnMain.Controls.Add(pnlResult);
             plnMain.Controls.Add(pnlHeader);
             plnMain.Controls.Add(pnlValue);
@@ -53,7 +58,7 @@
             plnMain.Location = new Point(0, 0);
             plnMain.Name = "plnMain";
             plnMain.Padding = new Padding(5);
-            plnMain.Size = new Size(153, 142);
+            plnMain.Size = new Size(153, 134);
             plnMain.TabIndex = 0;
             // 
             // pnlResult
@@ -63,7 +68,7 @@
             pnlResult.Controls.Add(lblResultValue);
             pnlResult.Location = new Point(5, 68);
             pnlResult.Name = "pnlResult";
-            pnlResult.Size = new Size(141, 65);
+            pnlResult.Size = new Size(141, 62);
             pnlResult.TabIndex = 3;
             // 
             // lblLastRefreshed
@@ -141,11 +146,32 @@
             lblValue.TabIndex = 0;
             lblValue.Text = "£10,274.71";
             // 
+            // contextMenu
+            // 
+            contextMenu.Items.AddRange(new ToolStripItem[] { settingsMenuItem, closeMenuItem });
+            contextMenu.Name = "contextMenu";
+            contextMenu.Size = new Size(117, 48);
+            // 
+            // settingsMenuItem
+            // 
+            settingsMenuItem.Name = "settingsMenuItem";
+            settingsMenuItem.Size = new Size(116, 22);
+            settingsMenuItem.Text = "Settings";
+            settingsMenuItem.Click += settingsMenuItem_Click;
+            // 
+            // closeMenuItem
+            // 
+            closeMenuItem.Name = "closeMenuItem";
+            closeMenuItem.Size = new Size(116, 22);
+            closeMenuItem.Text = "Close";
+            closeMenuItem.Click += closeMenuItem_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(153, 142);
+            ClientSize = new Size(153, 134);
+            ContextMenuStrip = contextMenu;
             Controls.Add(plnMain);
             FormBorderStyle = FormBorderStyle.None;
             Name = "Form1";
@@ -161,6 +187,7 @@
             pnlHeader.PerformLayout();
             pnlValue.ResumeLayout(false);
             pnlValue.PerformLayout();
+            contextMenu.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -175,5 +202,9 @@
         private Label lblResultValue;
         private Label lblLastRefreshed;
         private Label lblResultPercent;
+        private ContextMenuStrip contextMenu;
+        private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripMenuItem settingsMenuItem;
+        private ToolStripMenuItem closeMenuItem;
     }
 }
