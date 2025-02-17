@@ -72,8 +72,8 @@ namespace StockDisplay
 
         private void settingsMenuItem_Click(object sender, EventArgs e)
         {
-            //SettingsForm settingsForm = new SettingsForm(); // Assuming you have a SettingsForm
-            //settingsForm.ShowDialog(); // Show it as a modal dialog
+            SettingsForm settingsForm = new SettingsForm(); // Assuming you have a SettingsForm
+            settingsForm.ShowDialog(); // Show it as a modal dialog
         }
 
         private void closeMenuItem_Click(object sender, EventArgs e)
