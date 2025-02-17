@@ -17,11 +17,23 @@ namespace StockDisplay
 
         private void Form1_Load(object? sender, EventArgs e)
         {
-            foreach (Control control in this.Controls)
+            SubscribeMouseEvents(this);
+                }
+        // Recursive function to subscribe to mouse events for all controls
+
+        private void SubscribeMouseEvents(Control parent)
+        {
+            foreach (Control control in parent.Controls)
             {
                 control.MouseDown += Form1_MouseDown;
                 control.MouseMove += Form1_MouseMove;
                 control.MouseUp += Form1_MouseUp;
+
+                // Recursively subscribe for nested controls
+                if (control.HasChildren)
+                {
+                    SubscribeMouseEvents(control);
+                }
             }
         }
 
