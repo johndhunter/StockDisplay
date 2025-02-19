@@ -91,7 +91,7 @@
             lblResultPercent.Name = "lblResultPercent";
             lblResultPercent.Size = new Size(62, 18);
             lblResultPercent.TabIndex = 1;
-            lblResultPercent.Text = "0.080%";
+            lblResultPercent.Text = "settings";
             // 
             // lblResultValue
             // 
@@ -100,9 +100,9 @@
             lblResultValue.ForeColor = Color.White;
             lblResultValue.Location = new Point(5, 10);
             lblResultValue.Name = "lblResultValue";
-            lblResultValue.Size = new Size(57, 18);
+            lblResultValue.Size = new Size(129, 18);
             lblResultValue.TabIndex = 0;
-            lblResultValue.Text = "£93.06";
+            lblResultValue.Text = "right click to open";
             // 
             // pnlHeader
             // 
@@ -118,7 +118,7 @@
             // 
             lblStocksISA.AutoSize = true;
             lblStocksISA.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblStocksISA.ForeColor = Color.White;
+            lblStocksISA.ForeColor = Color.DeepSkyBlue;
             lblStocksISA.Location = new Point(5, 3);
             lblStocksISA.Margin = new Padding(0);
             lblStocksISA.Name = "lblStocksISA";
@@ -142,9 +142,9 @@
             lblValue.ForeColor = Color.White;
             lblValue.Location = new Point(5, 5);
             lblValue.Name = "lblValue";
-            lblValue.Size = new Size(118, 24);
+            lblValue.Size = new Size(113, 24);
             lblValue.TabIndex = 0;
-            lblValue.Text = "£10,274.71";
+            lblValue.Text = "No Api Key";
             // 
             // contextMenu
             // 
@@ -203,7 +203,6 @@
         private Label lblLastRefreshed;
         private Label lblResultPercent;
         private ContextMenuStrip contextMenu;
-        private ToolStripMenuItem toolStripMenuItem1;
         private ToolStripMenuItem settingsMenuItem;
         private ToolStripMenuItem closeMenuItem;
     }

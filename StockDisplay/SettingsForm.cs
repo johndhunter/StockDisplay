@@ -1,48 +1,78 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using StockDisplay.Services;
 
 namespace StockDisplay
 {
     public partial class SettingsForm : Form
     {
-        public SettingsForm()
+        private readonly ITrading212ApiService _trading212ApiService;
+        private string apiKey { get; set; } = string.Empty;
+        private int refreshFrequency { get; set; } = 0;
+
+        public SettingsForm(ITrading212ApiService trading212ApiService)
         {
             InitializeComponent();
+            _trading212ApiService = trading212ApiService;
+            apiKey = Properties.Settings.Default.ApiKey;
+            refreshFrequency = Properties.Settings.Default.RefreshFrequency;
         }
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            // Load existing settings (if any) from your application's settings
-            txtApiKey.Text = Properties.Settings.Default.ApiKey;
-            txtRefreshFrequency.Text = Properties.Settings.Default.RefreshFrequency.ToString();
+            txtApiKey.Text = apiKey;
+            txtRefreshFrequency.Text = refreshFrequency.ToString();
 
-            // Populate the PIE ComboBox (this will be done asynchronously later)
-            LoadPIEs();
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return;
+            }
+
+            //_ = LoadPIEs();
 
         }
         private async Task LoadPIEs()
         {
-            // Call the Trading 212 API to get the list of PIEs
-            // ... (API call logic - see next step)
+            //try
+            //{
+            //    if (!string.IsNullOrEmpty(apiKey))
+            //    {
+            //        var pies = await _trading212ApiService.GetPIEsAsync(); // Use injected service
 
-            // For now, let's add some dummy data
-            cmbSelectPie.Items.Add("PIE1");
-            cmbSelectPie.Items.Add("PIE2");
+            //        this.Invoke(() => // Use lambda expression - CORRECTED
+            //        {
+            //            cmbSelectPie.Items.Clear();
+            //            if (pies != null)
+            //            {
+            //                foreach (var pie in pies)
+            //                {
+            //                    cmbSelectPie.Items.Add(pie); // Assuming Pie has a ToString() override or display member set
+            //                }
 
-            // Select the previously selected PIE (if any)
-            cmbSelectPie.SelectedItem = Properties.Settings.Default.SelectedPIE;
+            //                if (Properties.Settings.Default.SelectedPie != 0)
+            //                {
+            //                    cmbSelectPie.SelectedItem = pies.Find(p => p.Id == Properties.Settings.Default.SelectedPie);
+            //                }
+            //                else if (cmbSelectPie.Items.Count > 0)
+            //                {
+            //                    cmbSelectPie.SelectedIndex = 0;
+            //                }
 
-            if (cmbSelectPie.Items.Count == 1)
-            {
-                cmbSelectPie.Enabled = false; // Disable if only one PIE
-            }
+            //                if (cmbSelectPie.Items.Count == 1)
+            //                {
+            //                    cmbSelectPie.Enabled = false; // Disable if only one PIE
+            //                }
+            //            }
+            //            else
+            //            {
+            //                // Handle the case where no pies are retrieved
+            //                MessageBox.Show(Resources.Error_NoPiesFound, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //            }
+            //        });
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show($"Error loading PIEs: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
         }
         private void btnSave_Click(object sender, EventArgs e)
         {
@@ -62,7 +92,8 @@ namespace StockDisplay
             // Save settings to your application's settings
             Properties.Settings.Default.ApiKey = txtApiKey.Text;
             Properties.Settings.Default.RefreshFrequency = refreshFrequency;
-            Properties.Settings.Default.SelectedPIE = cmbSelectPie.SelectedItem?.ToString();
+            //todo uncomment this
+//            Properties.Settings.Default.SelectedPie = (int)cmbSelectPie.SelectedItem!;
             Properties.Settings.Default.Save();
 
             this.DialogResult = DialogResult.OK; // Indicate that settings were saved

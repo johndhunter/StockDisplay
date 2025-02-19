@@ -49,13 +49,40 @@ namespace StockDisplay.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PIE2")]
-        public string SelectedPIE {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SelectedPie {
             get {
-                return ((string)(this["SelectedPIE"]));
+                return ((int)(this["SelectedPie"]));
             }
             set {
-                this["SelectedPIE"] = value;
+                this["SelectedPie"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://demo.trading212.com/api/v0/equity/")]
+        public string Trading212ApiEndpoint_Dev {
+            get {
+                return ((string)(this["Trading212ApiEndpoint_Dev"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://live.trading212.com/api/v0/equity/")]
+        public string Trading212ApiEndpoint_Prod {
+            get {
+                return ((string)(this["Trading212ApiEndpoint_Prod"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UseDevelopmentApi {
+            get {
+                return ((bool)(this["UseDevelopmentApi"]));
             }
         }
     }
