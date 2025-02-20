@@ -15,7 +15,7 @@
     public class AccountMetadata
     {
         public string CurrencyCode{ get; set; } = string.Empty;
-        public int Id { get; set; } 
+        public long Id { get; set; } 
     }
 
 }

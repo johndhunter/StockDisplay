@@ -27,7 +27,7 @@ namespace StockDisplay.Services
             try
             {
                 exchanges = (await _httpClient.GetFromJsonAsync<List<Exchange>>(apiEndpoint))!;
-                TraceOutput($"Exchanges: {JsonSerializer.Serialize(exchanges)}");
+                TraceOutput($"Exchanges:{Environment.NewLine} {JsonSerializer.Serialize(exchanges)}");
             }
             catch (Exception ex)
             {
@@ -44,7 +44,7 @@ namespace StockDisplay.Services
             try
             {
                 instruments = (await _httpClient.GetFromJsonAsync<List<Instrument>>(apiEndpoint))!;
-                TraceOutput($"Instruments: {JsonSerializer.Serialize(instruments)}");
+                TraceOutput($"Instruments:{Environment.NewLine}{JsonSerializer.Serialize(instruments)}");
             }
             catch (Exception ex)
             {
@@ -63,7 +63,7 @@ namespace StockDisplay.Services
             try
             {
                 pies = (await _httpClient.GetFromJsonAsync<List<Pie>>(apiEndpoint))!;
-                TraceOutput($"Pies: {JsonSerializer.Serialize(pies)}");
+                TraceOutput($"Pies:{Environment.NewLine}{JsonSerializer.Serialize(pies)}");
             }
             catch (Exception ex)
             {
@@ -73,7 +73,7 @@ namespace StockDisplay.Services
             return pies;
         }
 
-        public async Task<PieDetail> GetPieAsync(int pieId)
+        public async Task<PieDetail> GetPieAsync(long pieId)
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetPiesEndpoint + $"/{pieId}");
             var pieDetail = new PieDetail();
@@ -81,7 +81,7 @@ namespace StockDisplay.Services
             try
             {
                 pieDetail = (await _httpClient.GetFromJsonAsync<PieDetail>(apiEndpoint))!;
-                TraceOutput($"PieDetail: {JsonSerializer.Serialize(pieDetail)}");
+                TraceOutput($"PieDetail:{Environment.NewLine}{JsonSerializer.Serialize(pieDetail)}");
             }
             catch (Exception ex)
             {
@@ -101,7 +101,7 @@ namespace StockDisplay.Services
             try
             {
                 accountCash = (await _httpClient.GetFromJsonAsync<AccountCash>(apiEndpoint))!;
-                TraceOutput($"AccountCash: {JsonSerializer.Serialize(accountCash)}");
+                TraceOutput($"AccountCash:{Environment.NewLine}{JsonSerializer.Serialize(accountCash)}");
             }
             catch (Exception ex)
             {
@@ -118,7 +118,7 @@ namespace StockDisplay.Services
             try
             {
                 accountMetadata = (await _httpClient.GetFromJsonAsync<AccountMetadata>(apiEndpoint))!;
-                TraceOutput($"AccountMetadata: {JsonSerializer.Serialize(accountMetadata)}"); 
+                TraceOutput($"AccountMetadata:{Environment.NewLine}{JsonSerializer.Serialize(accountMetadata)}"); 
             }
             catch (Exception ex)
             {
@@ -137,7 +137,7 @@ namespace StockDisplay.Services
             try
             {
                 orders = (await _httpClient.GetFromJsonAsync<List<Order>>(apiEndpoint))!;
-                return orders;
+                TraceOutput($"Orders:{Environment.NewLine}{JsonSerializer.Serialize(orders)}");
             }
             catch (Exception ex)
             {
@@ -160,7 +160,7 @@ namespace StockDisplay.Services
             try
             {
                 positions = (await _httpClient.GetFromJsonAsync<List<Position>>(apiEndpoint))!;
-                TraceOutput($"Positions: {JsonSerializer.Serialize(positions)}");
+                TraceOutput($"Positions:{Environment.NewLine}{JsonSerializer.Serialize(positions)}");
             }
             catch (Exception ex)
             {
@@ -177,7 +177,7 @@ namespace StockDisplay.Services
             try
             {
                 position = (await _httpClient.GetFromJsonAsync<Position>(apiEndpoint))!;
-                TraceOutput($"Position: {JsonSerializer.Serialize(position)}");
+                TraceOutput($"Position:{Environment.NewLine}{JsonSerializer.Serialize(position)}");
             }
             catch (Exception ex)
             {
@@ -197,7 +197,7 @@ namespace StockDisplay.Services
                 response.EnsureSuccessStatusCode();
 
                 position = (await response.Content.ReadFromJsonAsync<Position>())!;
-                TraceOutput($"Position: {JsonSerializer.Serialize(position)}");
+                TraceOutput($"Position:{Environment.NewLine}{JsonSerializer.Serialize(position)}");
             }
             catch (Exception ex)
             {
@@ -215,7 +215,6 @@ namespace StockDisplay.Services
                 JsonException => "JSON Error :",
                 _ => UnexpectedError
             };
-
             TraceOutput($"{message} - calling {apiEndpoint} for type {exceptedType.Name} : {ex.Message}");
         }
 
@@ -235,17 +234,13 @@ namespace StockDisplay.Services
             try
             {
                 Trace.WriteLine(stringToOutput);
+                Trace.WriteLine("");
                 Trace.Flush();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"An error occurred: {ex.Message}");
+                Debug.WriteLine($"An error occurred with tracing:{Environment.NewLine}{ex.Message}");
             }
-        }
-
-        Task<List<Order>> ITrading212ApiService.GetOrdersAsync()
-        {
-            throw new NotImplementedException();
         }
     }
 }

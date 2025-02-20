@@ -139,19 +139,19 @@ namespace StockDisplay
                     await _trading212ApiService.GetPieAsync(pie.Id);
                 }
 
-                var exchanges = await _trading212ApiService.GetExchangesAsync();
-                Trace.WriteLine($"Number of Exchanges: {exchanges.Count}");
-                foreach (var exchange in exchanges)
-                {
-                    Trace.WriteLine($"Exchange: {JsonSerializer.Serialize(exchange)}");
-                }
+                //var exchanges = await _trading212ApiService.GetExchangesAsync();
+                //Trace.WriteLine($"Number of Exchanges: {exchanges.Count}");
+                //foreach (var exchange in exchanges)
+                //{
+                //    Trace.WriteLine($"Exchange: {JsonSerializer.Serialize(exchange)}");
+                //}
 
-                var instruments = await _trading212ApiService.GetInstrumentsAsync();
-                Trace.WriteLine($"Number of Instruments: {instruments.Count}");
-                foreach (var instrument in instruments)
-                {
-                    Trace.WriteLine($"Instrument: {JsonSerializer.Serialize(instrument)}");
-                }
+                //var instruments = await _trading212ApiService.GetInstrumentsAsync();
+                //Trace.WriteLine($"Number of Instruments: {instruments.Count}");
+                //foreach (var instrument in instruments)
+                //{
+                //    Trace.WriteLine($"Instrument: {JsonSerializer.Serialize(instrument)}");
+                //}
 
                 var orders = await _trading212ApiService.GetOrdersAsync();
                 Trace.WriteLine($"Number of Orders: {orders.Count}");
@@ -165,11 +165,11 @@ namespace StockDisplay
                 Trace.WriteLine($"Number of Positions: {positions.Count}");
                 foreach (var position in positions)
                 {
-                    if (instruments.Any(x => x.Ticker == position.Ticker))
-                    {
+                    //if (instruments.Any(x => x.Ticker == position.Ticker))
+                    //{
                         await _trading212ApiService.GetPositionAsync(position.Ticker);
-                        await _trading212ApiService.GetPositionByTickerAsync(position.Ticker);
-                    }
+                        //await _trading212ApiService.GetPositionByTickerAsync(position.Ticker);
+                    //}
                 }
 
             }

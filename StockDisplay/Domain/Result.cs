@@ -6,6 +6,5 @@
         public decimal? PriceAvgResult { get; set; }
         public decimal? PriceAvgResultCoef { get; set; }
         public decimal? PriceAvgValue { get; set; }
-        public string Description { get; set; } = string.Empty;
     }
 }

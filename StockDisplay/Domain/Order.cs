@@ -6,7 +6,7 @@
         public DateTime CreationTime { get; set; }
         public decimal? FilledQuantity { get; set; }
         public decimal FilledValue { get; set; }
-        public int Id { get; set; }
+        public long Id { get; set; }
         public decimal? LimitPrice { get; set; }
         public decimal? Quantity { get; set; }
         public string Status { get; set; } = string.Empty; 

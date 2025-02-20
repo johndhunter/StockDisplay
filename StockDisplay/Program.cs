@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http; 
 using StockDisplay.Services;
 
 namespace StockDisplay
@@ -17,14 +16,9 @@ namespace StockDisplay
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Console.WriteLine("Trace Listeners:"); TextWriterTraceListener listener = new TextWriterTraceListener("D:\\results.txt");
+            CustomTextWriterTraceListener listener = new CustomTextWriterTraceListener("C:\\results.txt");
             Trace.Listeners.Add(listener);
-            //foreach (TraceListener listener in Trace.Listeners)
-            //{
-            //    Debug.WriteLine(listener.GetType().Name);
-            //}
 
-            // Write a trace message
             Trace.WriteLine("Application starting up");
             Trace.Flush();
 
@@ -32,10 +26,9 @@ namespace StockDisplay
 
             services.AddHttpClient<ITrading212ApiService, Trading212ApiService>(client =>
             {
-                // No need to set the base URL here; it's dynamic
             });
 
-            services.AddTransient<Form1>(); // Register Form1
+            services.AddTransient<Form1>(); 
 
             using (var serviceProvider = services.BuildServiceProvider())
             {

@@ -10,7 +10,7 @@ namespace StockDisplay.Services
 
         // Pies - https://t212public-api-docs.redoc.ly/#tag/Pies
         Task<List<Pie>> GetPiesAsync();
-        Task<PieDetail> GetPieAsync(int pieId); 
+        Task<PieDetail> GetPieAsync(long pieId); 
 
         // Equity Orders - https://t212public-api-docs.redoc.ly/#tag/Equity-Orders
         Task<List<Order>> GetOrdersAsync();
