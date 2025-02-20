@@ -11,6 +11,6 @@
         public string ShortName { get; set; } = string.Empty;
         public string Ticker { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
-        public int WorkingScheduleId { get; set; }
+        public long WorkingScheduleId { get; set; }
     }
 }
