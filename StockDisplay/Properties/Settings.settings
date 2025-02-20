@@ -8,8 +8,17 @@
     <Setting Name="RefreshFrequency" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="SelectedPIE" Type="System.String" Scope="User">
-      <Value Profile="(Default)">PIE2</Value>
+    <Setting Name="SelectedPie" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="Trading212ApiEndpoint_Dev" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://demo.trading212.com/api/v0/equity/</Value>
+    </Setting>
+    <Setting Name="Trading212ApiEndpoint_Prod" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://live.trading212.com/api/v0/equity/</Value>
+    </Setting>
+    <Setting Name="UseDevelopmentApi" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>
