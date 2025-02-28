@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using StockDisplay.Services;
+using T212_Updates.Services;
 
-namespace StockDisplay
+namespace T212_Updates
 {
     internal static class Program
     {
@@ -29,6 +29,7 @@ namespace StockDisplay
             });
 
             services.AddTransient<Form1>(); 
+            services.AddSingleton<LogForm>();
 
             using (var serviceProvider = services.BuildServiceProvider())
             {

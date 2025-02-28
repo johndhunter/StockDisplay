@@ -2,224 +2,193 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using StockDisplay.Domain;
+using T212_Updates.Domain;
+using T212_Updates.Infrastructure;
 
-namespace StockDisplay.Services
+namespace T212_Updates.Services
 {
     public class Trading212ApiService : ITrading212ApiService
     {
         private readonly HttpClient _httpClient;
-        private string apiKey = string.Empty;
+        private readonly LogForm _logForm;
         private const string UnexpectedError = "Unexpected error";
+        private const int MaxRetries = 5;
+        private const int InitialDelayMilliseconds = 2000;
 
-        public Trading212ApiService(HttpClient httpClient)
+        public Trading212ApiService(HttpClient httpClient, LogForm logForm)
         {
             _httpClient = httpClient;
-            apiKey = Properties.Settings.Default.ApiKey;
+            _logForm = logForm;
         }
 
         #region Instruments metadata
-        public async Task<List<Exchange>> GetExchangesAsync()
+        public async Task<Result<List<Exchange>>> GetExchangesAsync()
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetExchangesEndpoint);
-            var exchanges = new List<Exchange>();
-
-            try
+            return await ExecuteWithRetryAsync(async () =>
             {
-                exchanges = (await _httpClient.GetFromJsonAsync<List<Exchange>>(apiEndpoint))!;
-                TraceOutput($"Exchanges:{Environment.NewLine} {JsonSerializer.Serialize(exchanges)}");
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, apiEndpoint, typeof(List<Exchange>));
-            }
-            return exchanges;
+                _logForm.LogInfo($"Fetching Exchange List");
+                var exchanges = (await _httpClient.GetFromJsonAsync<List<Exchange>>(apiEndpoint))!;
+                LogPretty("Exchanges", exchanges);
+                return Result<List<Exchange>>.Success(exchanges);
+            }, apiEndpoint, typeof(List<Exchange>));
         }
 
-        public async Task<List<Instrument>> GetInstrumentsAsync()
+        public async Task<Result<List<Instrument>>> GetInstrumentsAsync()
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetInstrumentsEndpoint);
-            var instruments = new List<Instrument>();
-
-            try
+            return await ExecuteWithRetryAsync(async () =>
             {
-                instruments = (await _httpClient.GetFromJsonAsync<List<Instrument>>(apiEndpoint))!;
-                TraceOutput($"Instruments:{Environment.NewLine}{JsonSerializer.Serialize(instruments)}");
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, apiEndpoint, typeof(List<Instrument>));
-            }
-            return instruments;
+                _logForm.LogInfo($"Fetching Instrument List");
+                var instruments = (await _httpClient.GetFromJsonAsync<List<Instrument>>(apiEndpoint))!;
+                LogPretty("Instruments", instruments);
+                return Result<List<Instrument>>.Success(instruments);
+            }, apiEndpoint, typeof(List<Instrument>));
         }
         #endregion instruments metadata
 
         #region Pies
-        public async Task<List<Pie>> GetPiesAsync()
+        public async Task<Result<List<Pie>>> GetPiesAsync()
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetPiesEndpoint);
-            var pies = new List<Pie>();
-
-            try
+            return await ExecuteWithRetryAsync(async () =>
             {
-                pies = (await _httpClient.GetFromJsonAsync<List<Pie>>(apiEndpoint))!;
-                TraceOutput($"Pies:{Environment.NewLine}{JsonSerializer.Serialize(pies)}");
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, apiEndpoint, typeof(List<Pie>));
-            }
-
-            return pies;
+                _logForm.LogInfo($"Fetching all pies");
+                var pies = (await _httpClient.GetFromJsonAsync<List<Pie>>(apiEndpoint))!;
+                LogPretty("Pies", pies);
+                return Result<List<Pie>>.Success(pies);
+            }, apiEndpoint, typeof(List<Pie>));
         }
 
-        public async Task<PieDetail> GetPieAsync(long pieId)
+        public async Task<Result<PieDetail>> GetPieAsync(long pieId)
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetPiesEndpoint + $"/{pieId}");
-            var pieDetail = new PieDetail();
-
-            try
+            return await ExecuteWithRetryAsync(async () =>
             {
-                pieDetail = (await _httpClient.GetFromJsonAsync<PieDetail>(apiEndpoint))!;
-                TraceOutput($"PieDetail:{Environment.NewLine}{JsonSerializer.Serialize(pieDetail)}");
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, apiEndpoint, typeof(PieDetail));
-            }
-            return pieDetail;
+                _logForm.LogInfo($"Fetching a pie with id [{pieId}]");
+                var pieDetail = (await _httpClient.GetFromJsonAsync<PieDetail>(apiEndpoint))!;
+                LogPretty("PieDetail", pieDetail);
+                return Result<PieDetail>.Success(pieDetail);
+            }, apiEndpoint, typeof(PieDetail));
         }
 
+        private void LogPretty(string name, object pieDetail)
+        {
+            _logForm.LogInfo($"{name}:{Environment.NewLine}{JsonSerializer.Serialize(pieDetail, new JsonSerializerOptions { WriteIndented = true })}");
+        }
         #endregion Pies
 
         #region Account Data
-        public async Task<AccountCash> GetAccountCashAsync()
+        public async Task<Result<AccountCash>> GetAccountCashAsync()
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetAccountCashEndPoint);
-            var accountCash = new AccountCash();
-
-            try
+            return await ExecuteWithRetryAsync(async () =>
             {
-                accountCash = (await _httpClient.GetFromJsonAsync<AccountCash>(apiEndpoint))!;
-                TraceOutput($"AccountCash:{Environment.NewLine}{JsonSerializer.Serialize(accountCash)}");
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, apiEndpoint, typeof(AccountCash));
-            }
-            return accountCash;
+                _logForm.LogInfo($"Fetching account cash");
+                var accountCash = (await _httpClient.GetFromJsonAsync<AccountCash>(apiEndpoint))!;
+                LogPretty("AccountCash", accountCash);
+                return Result<AccountCash>.Success(accountCash);
+            }, apiEndpoint, typeof(AccountCash));
         }
 
-        public async Task<AccountMetadata> GetAccountMetadataAsync()
+        public async Task<Result<AccountMetadata>> GetAccountMetadataAsync()
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetAccountMetaDataEndpoint);
-            var accountMetadata = new AccountMetadata();
-
-            try
+            return await ExecuteWithRetryAsync(async () =>
             {
-                accountMetadata = (await _httpClient.GetFromJsonAsync<AccountMetadata>(apiEndpoint))!;
-                TraceOutput($"AccountMetadata:{Environment.NewLine}{JsonSerializer.Serialize(accountMetadata)}"); 
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, apiEndpoint, typeof(AccountMetadata));
-            }
-            return accountMetadata;
+                _logForm.LogInfo($"Fetching account metadata");
+                var accountMetadata = (await _httpClient.GetFromJsonAsync<AccountMetadata>(apiEndpoint))!;
+                LogPretty("AccountMetadata", accountMetadata);
+                return Result<AccountMetadata>.Success(accountMetadata);
+            }, apiEndpoint, typeof(AccountMetadata));
         }
         #endregion Account Data
 
         #region Orders
-        public async Task<List<Order>> GetOrdersAsync()
+        public async Task<Result<List<Order>>> GetOrdersAsync()
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetEquityOrdersEndpoint);
-            var orders = new List<Order>();
-
-            try
+            return await ExecuteWithRetryAsync(async () =>
             {
-                orders = (await _httpClient.GetFromJsonAsync<List<Order>>(apiEndpoint))!;
-                TraceOutput($"Orders:{Environment.NewLine}{JsonSerializer.Serialize(orders)}");
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, apiEndpoint, typeof(List<Order>));
-            }
-            return orders;
+                _logForm.LogInfo($"Fetching orders");
+                var orders = (await _httpClient.GetFromJsonAsync<List<Order>>(apiEndpoint))!;
+                LogPretty("Orders", orders);
+                return Result<List<Order>>.Success(orders);
+            }, apiEndpoint, typeof(List<Order>));
         }
 
-        public Task<Order> GetOrderAsync(string orderId)
+        public async Task<Result<Order>> GetOrderAsync(string orderId)
         {
-            throw new NotImplementedException();
+            string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetEquityOrdersEndpoint + $"/{orderId}");
+                return await ExecuteWithRetryAsync(async () =>
+                {
+                    _logForm.LogInfo($"Fetching order with id [{orderId}]");
+                    var order = (await _httpClient.GetFromJsonAsync<Order>(apiEndpoint))!;
+                    LogPretty("Order", order);
+                    return Result<Order>.Success(order);
+                }, apiEndpoint, typeof(Order));
         }
         #endregion Orders
 
         #region Personal Portfolio
-        public async Task<List<Position>> GetPositionsAsync()
+        public async Task<Result<List<Position>>> GetPositionsAsync()
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetPositionsEndpoint);
-            var positions = new List<Position>();
             try
             {
-                positions = (await _httpClient.GetFromJsonAsync<List<Position>>(apiEndpoint))!;
-                TraceOutput($"Positions:{Environment.NewLine}{JsonSerializer.Serialize(positions)}");
+                _logForm.LogInfo($"Fetching positions");
+                var positions = (await _httpClient.GetFromJsonAsync<List<Position>>(apiEndpoint))!;
+                LogPretty("Positions", positions);
+                return Result<List<Position>>.Success(positions);
             }
             catch (Exception ex)
             {
                 HandleException(ex, apiEndpoint, typeof(List<Position>));
+                return Result<List<Position>>.Failure(ex.Message);
             }
-            return positions;
-
         }
 
-        public async Task<Position> GetPositionAsync(string positionTickerSymbol)
+        public async Task<Result<Position>> GetPositionAsync(string positionTickerSymbol)
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetPositionsEndpoint + $"/{positionTickerSymbol}");
-            var position = new Position();
             try
             {
-                position = (await _httpClient.GetFromJsonAsync<Position>(apiEndpoint))!;
-                TraceOutput($"Position:{Environment.NewLine}{JsonSerializer.Serialize(position)}");
+                _logForm.LogInfo($"Fetching position with ticker [{positionTickerSymbol}]");
+                var position = (await _httpClient.GetFromJsonAsync<Position>(apiEndpoint))!;
+                LogPretty("Position", position);
+                return Result<Position>.Success(position);
             }
             catch (Exception ex)
             {
                 HandleException(ex, apiEndpoint, typeof(Position));
+                return Result<Position>.Failure(ex.Message);
             }
-            return position;
         }
 
-        public async Task<Position> GetPositionByTickerAsync(string tickerSymbol)
+        public async Task<Result<Position>> GetPositionByTickerAsync(string tickerSymbol)
         {
             string apiEndpoint = GetApiEndpointWithAuthorization(Resources.GetPositionsByTickerEndpoint);
-            var position = new Position();
             try
-            { 
+            {
+                _logForm.LogInfo($"Searching for a specific position with ticker [{tickerSymbol}]");
                 using HttpResponseMessage response = await _httpClient.PostAsJsonAsync(apiEndpoint, tickerSymbol);
-
                 response.EnsureSuccessStatusCode();
-
-                position = (await response.Content.ReadFromJsonAsync<Position>())!;
-                TraceOutput($"Position:{Environment.NewLine}{JsonSerializer.Serialize(position)}");
+                var position = (await response.Content.ReadFromJsonAsync<Position>())!;
+                LogPretty("Position", position);
+                return Result<Position>.Success(position);
             }
             catch (Exception ex)
             {
                 HandleException(ex, apiEndpoint, typeof(Position));
+                return Result<Position>.Failure(ex.Message);
             }
-            return position;
         }
         #endregion Personal Portfolio
 
-        private void HandleException(Exception ex, string apiEndpoint, Type exceptedType)
-        {
-            var message = ex switch
-            {
-                HttpRequestException => "HTTP Error : ",
-                JsonException => "JSON Error :",
-                _ => UnexpectedError
-            };
-            TraceOutput($"{message} - calling {apiEndpoint} for type {exceptedType.Name} : {ex.Message}");
-        }
-
         private string GetApiEndpointWithAuthorization(string? target = null)
         {
+            var apiKey = Properties.Settings.Default.ApiKey;
+
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(apiKey);
 
             var endpoint = Properties.Settings.Default.UseDevelopmentApi ?
@@ -229,18 +198,43 @@ namespace StockDisplay.Services
             return endpoint + target;
         }
 
-        private void TraceOutput(string stringToOutput)
+        private async Task<Result<T>> ExecuteWithRetryAsync<T>(Func<Task<Result<T>>> action, string apiEndpoint, Type exceptedType)
         {
-            try
+            int retryCount = 0;
+            int delay = InitialDelayMilliseconds;
+
+            while (true)
             {
-                Trace.WriteLine(stringToOutput);
-                Trace.WriteLine("");
-                Trace.Flush();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"An error occurred with tracing:{Environment.NewLine}{ex.Message}");
+                try
+                {
+                    return await action();
+                }
+                catch (HttpRequestException ex) when (retryCount < MaxRetries)
+                {
+                    HandleException(ex, apiEndpoint, exceptedType);
+                    await Task.Delay(delay);
+                    _logForm.LogWarning($"Retrying {retryCount + 1} of {MaxRetries} after {delay}ms");
+                    delay *= 2; // Exponential backoff
+                    retryCount++;
+                }
+                catch (Exception ex)
+                {
+                    HandleException(ex, apiEndpoint, exceptedType);
+                    _logForm.LogError($"Retrying {retryCount + 1} of {MaxRetries} after {delay}ms - timed out");
+                    return Result<T>.Failure(ex.Message);
+                }
             }
         }
+        private void HandleException(Exception ex, string apiEndpoint, Type exceptedType)
+        {
+            var message = ex switch
+            {
+                HttpRequestException => "HTTP Error : ",
+                JsonException => "JSON Error :",
+                _ => UnexpectedError
+            };
+            _logForm.LogError($"{message} - calling {apiEndpoint} for type {exceptedType.Name} : {ex.Message}");
+        }
+
     }
 }

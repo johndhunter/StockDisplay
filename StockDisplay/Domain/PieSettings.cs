@@ -1,10 +1,16 @@
-﻿namespace StockDisplay.Domain
+﻿using System.Text.Json.Serialization;
+
+namespace T212_Updates.Domain
 {
     public class PieSettings
     {
-        public DateTime CreationDate { get; set; }
+        [JsonConverter(typeof(FlexibleDateTimeOffsetConverter))]
+        public DateTimeOffset? CreationDate { get; set; }
+        
+        [JsonConverter(typeof(FlexibleDateTimeOffsetConverter))]
+        public DateTimeOffset? EndDate { get; set; }
+
         public string DividendCashAction { get; set; } = string.Empty;
-        public DateTime EndDate { get; set; }
         public decimal? Goal { get; set; }
         public string Icon { get; set; } = string.Empty;
         public long Id { get; set; }

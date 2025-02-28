@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StockDisplay.Domain
+namespace T212_Updates.Domain
 {
 
     public class Position

@@ -1,4 +1,4 @@
-﻿namespace StockDisplay
+﻿namespace T212_Updates
 {
     partial class SettingsForm
     {
@@ -30,12 +30,13 @@
         {
             lblApiKey = new Label();
             txtApiKey = new TextBox();
-            txtRefreshFrequency = new TextBox();
             lblRefreshFrequency = new Label();
             lblSelectPie = new Label();
             cmbSelectPie = new ComboBox();
             btnSave = new Button();
             btnCancel = new Button();
+            numRefreshFrequency = new NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)numRefreshFrequency).BeginInit();
             SuspendLayout();
             // 
             // lblApiKey
@@ -54,13 +55,6 @@
             txtApiKey.Size = new Size(249, 23);
             txtApiKey.TabIndex = 1;
             // 
-            // txtRefreshFrequency
-            // 
-            txtRefreshFrequency.Location = new Point(11, 75);
-            txtRefreshFrequency.Name = "txtRefreshFrequency";
-            txtRefreshFrequency.Size = new Size(249, 23);
-            txtRefreshFrequency.TabIndex = 3;
-            // 
             // lblRefreshFrequency
             // 
             lblRefreshFrequency.AutoSize = true;
@@ -78,18 +72,19 @@
             lblSelectPie.Size = new Size(57, 15);
             lblSelectPie.TabIndex = 4;
             lblSelectPie.Text = "Select PIE";
+            lblSelectPie.Visible = false;
             // 
             // cmbSelectPie
             // 
             cmbSelectPie.FormattingEnabled = true;
             cmbSelectPie.Location = new Point(11, 127);
             cmbSelectPie.Name = "cmbSelectPie";
-            cmbSelectPie.Size = new Size(121, 23);
+            cmbSelectPie.Size = new Size(239, 23);
             cmbSelectPie.TabIndex = 5;
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(94, 166);
+            btnSave.Location = new Point(94, 156);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(75, 23);
             btnSave.TabIndex = 6;
@@ -99,7 +94,7 @@
             // 
             // btnCancel
             // 
-            btnCancel.Location = new Point(185, 166);
+            btnCancel.Location = new Point(175, 156);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(75, 23);
             btnCancel.TabIndex = 7;
@@ -107,22 +102,36 @@
             btnCancel.UseVisualStyleBackColor = true;
             btnCancel.Click += btnCancel_Click;
             // 
+            // numRefreshFrequency
+            // 
+            numRefreshFrequency.Location = new Point(11, 78);
+            numRefreshFrequency.Maximum = new decimal(new int[] { 1440, 0, 0, 0 });
+            numRefreshFrequency.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numRefreshFrequency.Name = "numRefreshFrequency";
+            numRefreshFrequency.Size = new Size(47, 23);
+            numRefreshFrequency.TabIndex = 8;
+            numRefreshFrequency.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(281, 205);
+            ClientSize = new Size(281, 182);
+            ControlBox = false;
+            Controls.Add(numRefreshFrequency);
             Controls.Add(btnCancel);
             Controls.Add(btnSave);
             Controls.Add(cmbSelectPie);
             Controls.Add(lblSelectPie);
-            Controls.Add(txtRefreshFrequency);
             Controls.Add(lblRefreshFrequency);
             Controls.Add(txtApiKey);
             Controls.Add(lblApiKey);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            HelpButton = true;
             Name = "SettingsForm";
-            Text = "SettingsForm";
+            Text = "Settings";
             Load += SettingsForm_Load;
+            ((System.ComponentModel.ISupportInitialize)numRefreshFrequency).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -131,11 +140,11 @@
 
         private Label lblApiKey;
         private TextBox txtApiKey;
-        private TextBox txtRefreshFrequency;
         private Label lblRefreshFrequency;
         private Label lblSelectPie;
         private ComboBox cmbSelectPie;
         private Button btnSave;
         private Button btnCancel;
+        private NumericUpDown numRefreshFrequency;
     }
 }

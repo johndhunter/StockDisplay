@@ -1,4 +1,4 @@
-﻿namespace StockDisplay
+﻿namespace T212_Updates
 {
     partial class Form1
     {
@@ -31,21 +31,27 @@
             components = new System.ComponentModel.Container();
             plnMain = new Panel();
             pnlResult = new Panel();
+            label1 = new Label();
             lblLastRefreshed = new Label();
             lblResultPercent = new Label();
-            lblResultValue = new Label();
             pnlHeader = new Panel();
             lblStocksISA = new Label();
             pnlValue = new Panel();
             lblValue = new Label();
             contextMenu = new ContextMenuStrip(components);
             settingsMenuItem = new ToolStripMenuItem();
+            logToolStripMenuItem = new ToolStripMenuItem();
             closeMenuItem = new ToolStripMenuItem();
+            timeRefresh = new System.Windows.Forms.Timer(components);
+            toolTip1 = new ToolTip(components);
+            contextMenuRefresh = new ContextMenuStrip(components);
+            refreshNowToolStripMenuItem = new ToolStripMenuItem();
             plnMain.SuspendLayout();
             pnlResult.SuspendLayout();
             pnlHeader.SuspendLayout();
             pnlValue.SuspendLayout();
             contextMenu.SuspendLayout();
+            contextMenuRefresh.SuspendLayout();
             SuspendLayout();
             // 
             // plnMain
@@ -63,46 +69,47 @@
             // 
             // pnlResult
             // 
+            pnlResult.Controls.Add(label1);
             pnlResult.Controls.Add(lblLastRefreshed);
             pnlResult.Controls.Add(lblResultPercent);
-            pnlResult.Controls.Add(lblResultValue);
             pnlResult.Location = new Point(5, 68);
             pnlResult.Name = "pnlResult";
             pnlResult.Size = new Size(141, 62);
             pnlResult.TabIndex = 3;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.ForeColor = Color.White;
+            label1.Location = new Point(-4, 35);
+            label1.Name = "label1";
+            label1.Size = new Size(69, 15);
+            label1.TabIndex = 3;
+            label1.Text = "Last Update";
             // 
             // lblLastRefreshed
             // 
             lblLastRefreshed.AutoSize = true;
             lblLastRefreshed.Font = new Font("Arial", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblLastRefreshed.ForeColor = Color.White;
-            lblLastRefreshed.Location = new Point(72, 38);
+            lblLastRefreshed.Location = new Point(79, 35);
             lblLastRefreshed.Name = "lblLastRefreshed";
             lblLastRefreshed.Size = new Size(50, 16);
             lblLastRefreshed.TabIndex = 2;
-            lblLastRefreshed.Text = "3m ago";
+            lblLastRefreshed.Text = "0m ago";
+            lblLastRefreshed.MouseUp += lblLastRefreshed_MouseUp;
             // 
             // lblResultPercent
             // 
             lblResultPercent.AutoSize = true;
             lblResultPercent.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblResultPercent.ForeColor = Color.White;
-            lblResultPercent.Location = new Point(5, 37);
+            lblResultPercent.Location = new Point(-5, 0);
             lblResultPercent.Name = "lblResultPercent";
-            lblResultPercent.Size = new Size(62, 18);
+            lblResultPercent.Size = new Size(94, 18);
             lblResultPercent.TabIndex = 1;
-            lblResultPercent.Text = "settings";
-            // 
-            // lblResultValue
-            // 
-            lblResultValue.AutoSize = true;
-            lblResultValue.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblResultValue.ForeColor = Color.White;
-            lblResultValue.Location = new Point(5, 10);
-            lblResultValue.Name = "lblResultValue";
-            lblResultValue.Size = new Size(129, 18);
-            lblResultValue.TabIndex = 0;
-            lblResultValue.Text = "right click to open";
+            lblResultPercent.Text = "Use settings";
+            toolTip1.SetToolTip(lblResultPercent, "This is the ppl value");
             // 
             // pnlHeader
             // 
@@ -119,7 +126,7 @@
             lblStocksISA.AutoSize = true;
             lblStocksISA.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblStocksISA.ForeColor = Color.DeepSkyBlue;
-            lblStocksISA.Location = new Point(5, 3);
+            lblStocksISA.Location = new Point(-5, 3);
             lblStocksISA.Margin = new Padding(0);
             lblStocksISA.Name = "lblStocksISA";
             lblStocksISA.Size = new Size(85, 18);
@@ -140,17 +147,18 @@
             lblValue.AutoSize = true;
             lblValue.Font = new Font("Arial", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblValue.ForeColor = Color.White;
-            lblValue.Location = new Point(5, 5);
+            lblValue.Location = new Point(-5, 3);
             lblValue.Name = "lblValue";
             lblValue.Size = new Size(113, 24);
             lblValue.TabIndex = 0;
             lblValue.Text = "No Api Key";
+            toolTip1.SetToolTip(lblValue, "This is the cash value");
             // 
             // contextMenu
             // 
-            contextMenu.Items.AddRange(new ToolStripItem[] { settingsMenuItem, closeMenuItem });
+            contextMenu.Items.AddRange(new ToolStripItem[] { settingsMenuItem, logToolStripMenuItem, closeMenuItem });
             contextMenu.Name = "contextMenu";
-            contextMenu.Size = new Size(117, 48);
+            contextMenu.Size = new Size(117, 70);
             // 
             // settingsMenuItem
             // 
@@ -159,12 +167,41 @@
             settingsMenuItem.Text = "Settings";
             settingsMenuItem.Click += settingsMenuItem_Click;
             // 
+            // logToolStripMenuItem
+            // 
+            logToolStripMenuItem.Name = "logToolStripMenuItem";
+            logToolStripMenuItem.Size = new Size(116, 22);
+            logToolStripMenuItem.Text = "Log";
+            logToolStripMenuItem.Click += logToolStripMenuItem_Click;
+            // 
             // closeMenuItem
             // 
             closeMenuItem.Name = "closeMenuItem";
             closeMenuItem.Size = new Size(116, 22);
             closeMenuItem.Text = "Close";
             closeMenuItem.Click += closeMenuItem_Click;
+            // 
+            // timeRefresh
+            // 
+            timeRefresh.Interval = 10000;
+            timeRefresh.Tick += timeRefresh_Tick;
+            // 
+            // toolTip1
+            // 
+            toolTip1.Popup += toolTip1_Popup;
+            // 
+            // contextMenuRefresh
+            // 
+            contextMenuRefresh.Items.AddRange(new ToolStripItem[] { refreshNowToolStripMenuItem });
+            contextMenuRefresh.Name = "contextMenuRefreh";
+            contextMenuRefresh.Size = new Size(181, 48);
+            // 
+            // refreshNowToolStripMenuItem
+            // 
+            refreshNowToolStripMenuItem.Name = "refreshNowToolStripMenuItem";
+            refreshNowToolStripMenuItem.Size = new Size(180, 22);
+            refreshNowToolStripMenuItem.Text = "Refresh Now";
+            refreshNowToolStripMenuItem.Click += refreshNowToolStripMenuItem_Click;
             // 
             // Form1
             // 
@@ -188,6 +225,7 @@
             pnlValue.ResumeLayout(false);
             pnlValue.PerformLayout();
             contextMenu.ResumeLayout(false);
+            contextMenuRefresh.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -205,5 +243,11 @@
         private ContextMenuStrip contextMenu;
         private ToolStripMenuItem settingsMenuItem;
         private ToolStripMenuItem closeMenuItem;
+        private Label label1;
+        private System.Windows.Forms.Timer timeRefresh;
+        private ToolTip toolTip1;
+        private ToolStripMenuItem logToolStripMenuItem;
+        private ContextMenuStrip contextMenuRefresh;
+        private ToolStripMenuItem refreshNowToolStripMenuItem;
     }
 }

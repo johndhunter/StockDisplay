@@ -1,25 +1,33 @@
-﻿using StockDisplay.Services;
+﻿using T212_Updates.Services;
 
-namespace StockDisplay
+namespace T212_Updates
 {
     public partial class SettingsForm : Form
     {
         private readonly ITrading212ApiService _trading212ApiService;
+        private readonly LogForm logForm;
+
         private string apiKey { get; set; } = string.Empty;
         private int refreshFrequency { get; set; } = 0;
 
-        public SettingsForm(ITrading212ApiService trading212ApiService)
+        
+        public SettingsForm(ITrading212ApiService trading212ApiService, LogForm logForm)
         {
             InitializeComponent();
             _trading212ApiService = trading212ApiService;
+            this.logForm = logForm;
             apiKey = Properties.Settings.Default.ApiKey;
             refreshFrequency = Properties.Settings.Default.RefreshFrequency;
+            if(refreshFrequency == 0)
+            {
+                refreshFrequency = 10;
+            }
         }
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
             txtApiKey.Text = apiKey;
-            txtRefreshFrequency.Text = refreshFrequency.ToString();
+            numRefreshFrequency.Text = refreshFrequency.ToString();
 
             if (string.IsNullOrEmpty(apiKey))
             {
@@ -41,14 +49,13 @@ namespace StockDisplay
                     await this.Invoke(async () => 
                     {
                         cmbSelectPie.Items.Clear();
-                        if (pies != null || pies!.Count == 0)
+                        if (pies != null && pies.Data != null && pies.Data.Count > 0)
                         {
-                            await PopulatePieDropdown(pies);
+                            await PopulatePieDropdown(pies.Data);
                         }
                         else
                         {
-                            // Handle the case where no pies are retrieved
-                            MessageBox.Show(Resources.Error_NoPiesFound, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            logForm.LogWarning(Resources.Error_NoPiesFound);
                         }
                     });
                 }
@@ -63,8 +70,10 @@ namespace StockDisplay
         {
             foreach (var pie in pies)
             {
-                var pieDetail = await _trading212ApiService.GetPieAsync(pie.Id);
-                cmbSelectPie.Items.Add(new { Id = pie.Id, Name = pieDetail.Settings.Name });
+                Task.Delay(1000).Wait(); // Delay to avoid rate limiting
+
+                var pieDetailResult = await _trading212ApiService.GetPieAsync(pie.Id);
+                cmbSelectPie.Items.Add(new { Id = pie.Id, Name = pieDetailResult!.Data!.Settings.Name });
             }
 
             if (Properties.Settings.Default.SelectedPie != 0)
@@ -91,7 +100,7 @@ namespace StockDisplay
                 return;
             }
 
-            if (!int.TryParse(txtRefreshFrequency.Text, out int refreshFrequency) || refreshFrequency <= 0)
+            if (!int.TryParse(numRefreshFrequency.Text, out int refreshFrequency) || refreshFrequency <= 0)
             {
                 MessageBox.Show("Invalid refresh frequency.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;

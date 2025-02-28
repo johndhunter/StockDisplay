@@ -1,4 +1,4 @@
-﻿namespace StockDisplay.Domain
+﻿namespace T212_Updates.Domain
 {
     public class PieInstrument
     {

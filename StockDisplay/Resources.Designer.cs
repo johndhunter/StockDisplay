@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace StockDisplay {
+namespace T212_Updates {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace StockDisplay {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("StockDisplay.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("T212_Updates.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -97,6 +97,15 @@ namespace StockDisplay {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to update the UI.
+        /// </summary>
+        internal static string Error_UpdateDisplayFailed {
+            get {
+                return ResourceManager.GetString("Error_UpdateDisplayFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to account/cash.
         /// </summary>
         internal static string GetAccountCashEndPoint {
@@ -106,7 +115,7 @@ namespace StockDisplay {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to account.
+        ///   Looks up a localized string similar to account/info.
         /// </summary>
         internal static string GetAccountMetaDataEndpoint {
             get {

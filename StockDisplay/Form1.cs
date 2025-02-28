@@ -1,26 +1,28 @@
 using System.Diagnostics;
-using System.Resources;
 using System.Text.Json;
-using StockDisplay.Domain;
-using StockDisplay.Services;
+using T212_Updates.Domain;
+using T212_Updates.Services;
 
-namespace StockDisplay
+namespace T212_Updates
 {
     public partial class Form1 : Form
     {
         private bool isDragging = false;
         private Point offset;
+        private int refreshIntervalInMilliseconds;
         private const int stockPadding = 5;
         private const int stockSpacing = 3;
-        private readonly ITrading212ApiService _trading212ApiService; // Inject the typed client
+        private readonly ITrading212ApiService _trading212ApiService;
+        private readonly LogForm _logForm;
+        private const int defaultInterval = 60000;
         private string apiKey { get; set; } = string.Empty;
 
-        public Form1(ITrading212ApiService trading212ApiService)
+        public Form1(ITrading212ApiService trading212ApiService, LogForm logForm)
         {
             InitializeComponent();
 
             _trading212ApiService = trading212ApiService;
-
+            _logForm = logForm;
             AddFormEventHandlers();
         }
 
@@ -28,32 +30,39 @@ namespace StockDisplay
         {
             pnlHeader.Height = lblStocksISA.Height + (2 * stockSpacing) + 6; // Padding and spacing adjustment
             pnlValue.Height = lblValue.Height + (2 * stockSpacing) + 6;
-            pnlResult.Height = lblResultValue.Height + stockSpacing + lblResultPercent.Height + (2 * stockSpacing) + 8;
-
+            //pnlResult.Height = lblResultValue.Height + stockSpacing + lblResultPercent.Height + (2 * stockSpacing) + 8;
             SubscribeMouseEvents(this);
-
-
         }
-        #region add handlers
+
+
+        #region form event handling
         private void AddFormEventHandlers()
         {
-            MouseDown += Form1_MouseDown;
-            MouseMove += Form1_MouseMove;
-            MouseUp += Form1_MouseUp;
-
             Load += Form1_Load;
             Shown += Form1_Shown;
         }
 
         private void Form1_Shown(object? sender, EventArgs e)
         {
-            apiKey = Properties.Settings.Default.ApiKey; // Get API key from settings
-            if (!string.IsNullOrEmpty(apiKey))
+            apiKey = Properties.Settings.Default.ApiKey;
+            refreshIntervalInMilliseconds = Properties.Settings.Default.RefreshFrequency * 60000;
+            if (refreshIntervalInMilliseconds == 0)
             {
-                _ = LoadData(); // Load data asynchronously
+                refreshIntervalInMilliseconds = defaultInterval;
             }
+
+            timeRefresh.Interval = refreshIntervalInMilliseconds;
+
+            _ = UpdateData();
+
+            timeRefresh.Start();
         }
-        #endregion
+        private void timeRefresh_Tick(object? sender, EventArgs e)
+        {
+            _ = UpdateData();
+        }
+        #endregion form event handling
+
         #region mouse handling
         private void SubscribeMouseEvents(Control parent)
         {
@@ -95,48 +104,68 @@ namespace StockDisplay
         }
         private void Form1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            this.Close(); // Close the form on double-click
+            this.Close();
         }
         #endregion
+
         #region button handling
         private void settingsMenuItem_Click(object sender, EventArgs e)
         {
-            using (var settingsForm = new SettingsForm(_trading212ApiService)) // Pass the service
+            timeRefresh.Stop();
+            using (var settingsForm = new SettingsForm(_trading212ApiService, _logForm))
             {
                 if (settingsForm.ShowDialog() == DialogResult.OK)
                 {
-                    _ = LoadData(); // Refresh data
+                    apiKey = Properties.Settings.Default.ApiKey;
+                    refreshIntervalInMilliseconds = Properties.Settings.Default.RefreshFrequency * 60000;
+                    _ = UpdateData();
                 }
             }
+            timeRefresh.Start();
         }
 
         private void closeMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close(); // Close the form
+            if (_logForm.Visible)
+            {
+                _logForm.Close();
+            }
+            this.Close();
         }
         #endregion
 
-        private async Task LoadData()
+        private async Task UpdateData()
         {
             if (string.IsNullOrEmpty(apiKey))
             {
                 return;
             }
 
+            _logForm.LogInfo("Refreshing data...");
+
             try
             {
-                AccountCash accountCash = await _trading212ApiService.GetAccountCashAsync();
+                lblLastRefreshed.Text = DateTime.Now.Hour.ToString("00") + ":" + DateTime.Now.Minute.ToString("00");
 
-                UpdateCashData(accountCash);
+                var accountCashResult = await _trading212ApiService.GetAccountCashAsync();
 
-                var accountMetadata = await _trading212ApiService.GetAccountMetadataAsync();
-
-                var pies = await _trading212ApiService.GetPiesAsync();
-
-                Trace.WriteLine($"Number of Pies: {pies.Count}");
-                foreach (var pie in pies)
+                if (accountCashResult.IsFailure)
                 {
-                    await _trading212ApiService.GetPieAsync(pie.Id);
+                    _logForm.LogError($"{Resources.Error_ApiCallFailed} : {accountCashResult.Error}");
+                    UpdateDisplay(null);
+                    return;
+                }
+                UpdateDisplay(accountCashResult.Data);
+
+                var accountMetadataResult = await _trading212ApiService.GetAccountMetadataAsync();
+                var piesResult = await _trading212ApiService.GetPiesAsync();
+
+                if (piesResult.IsSuccess)
+                {
+                    foreach (var pie in piesResult.Data!)
+                    {
+                        await _trading212ApiService.GetPieAsync(pie.Id);
+                    }
                 }
 
                 //var exchanges = await _trading212ApiService.GetExchangesAsync();
@@ -153,85 +182,85 @@ namespace StockDisplay
                 //    Trace.WriteLine($"Instrument: {JsonSerializer.Serialize(instrument)}");
                 //}
 
-                var orders = await _trading212ApiService.GetOrdersAsync();
-                Trace.WriteLine($"Number of Orders: {orders.Count}");
-                foreach (var order in orders)
-                {
-                    Trace.WriteLine($"Order: {JsonSerializer.Serialize(order)}");
-                    await _trading212ApiService.GetOrderAsync(order.Id.ToString());
-                }
+                //var ordersResult = await _trading212ApiService.GetOrdersAsync();
+                //Trace.WriteLine($"Number of Orders: {ordersResult.Data!.Count}");
+                //foreach (var order in ordersResult.Data)
+                //{
+                //    Trace.WriteLine($"Order: {JsonSerializer.Serialize(order)}");
+                //    await _trading212ApiService.GetOrderAsync(order.Id.ToString());
+                //}
 
-                var positions = await _trading212ApiService.GetPositionsAsync();
-                Trace.WriteLine($"Number of Positions: {positions.Count}");
-                foreach (var position in positions)
-                {
-                    //if (instruments.Any(x => x.Ticker == position.Ticker))
-                    //{
-                        await _trading212ApiService.GetPositionAsync(position.Ticker);
-                        //await _trading212ApiService.GetPositionByTickerAsync(position.Ticker);
-                    //}
-                }
+                //var positionsResult = await _trading212ApiService.GetPositionsAsync();
+                //Trace.WriteLine($"Number of Positions: {positionsResult.Data!.Count}");
+                //foreach (var position in positionsResult.Data)
+                //{
+                //    //if (instruments.Any(x => x.Ticker == position.Ticker))
+                //    //{
+                //    await _trading212ApiService.GetPositionAsync(position.Ticker);
+                //    //await _trading212ApiService.GetPositionByTickerAsync(position.Ticker);
+                //    //}
+                //}
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Resources.Error_ApiCallFailed + ": " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                UpdateCashData(null);
+                _logForm.LogError($"{Resources.Error_ApiCallFailed} : {ex.Message}");
+                UpdateDisplay(null);
             }
         }
 
-        private void UpdateUIData(PieDetail? pieDetail)
+        private void UpdateDisplay(AccountCash? accountCash)
         {
-            //this.Invoke(() =>
-            //{
-            //    if (pieDetail != null && pieDetail.Instruments != null && pieDetail.Instruments.Length > 0)
-            //    {
-            //        // Assuming you want to display data for the first instrument (adjust as needed)
-            //        var instrument = pieDetail.Instruments[0]; // Get the first instrument
-
-            //        // Map the data to the labels
-            //        lblValue.Text = instrument.Result.PriceAvgValue.ToString("N2"); // Format as currency (replace with your desired format)
-
-            //        // For lblResultValue and lblResultPercent, you'll need to decide which values to display.
-            //        // Based on the JSON you provided, the Instrument.Result object has the following:
-            //        // PriceAvgInvestedValue
-            //        // PriceAvgResult
-            //        // PriceAvgResultCoef
-            //        // PriceAvgValue
-
-            //        // Example: Display PriceAvgResult in lblResultValue and PriceAvgResultCoef in lblResultPercent
-            //        lblResultValue.Text = instrument.Result.PriceAvgResult.ToString("N2"); // Format as currency (replace with your desired format)
-            //        lblResultPercent.Text = instrument.Result.PriceAvgResultCoef.ToString("P2"); // Format as percentage (replace with your desired format)
-            //    }
-            //    else
-            //    {
-            //        // Handle cases where pieDetails or instruments are null or empty
-            //        lblValue.Text = "N/A";
-            //        lblResultValue.Text = "N/A";
-            //        lblResultPercent.Text = "N/A";
-            //    }
-            //});
-        }
-        private void UpdateCashData(AccountCash? accountCash)
-        {
-            this.Invoke(() =>
+            try
             {
-                if (accountCash != null)
+                this.Invoke(() =>
                 {
-                    // Map the data to the labels
-                    lblValue.Text = $"£{accountCash.Invested}";
-                    lblResultValue.Text = $"£{accountCash.Result}";
-                    lblResultPercent.Text = $"£{accountCash.Ppl}";
-                    lblLastRefreshed.Text = DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString();
-                }
-                else
-                {
-                    // Handle cases where pieDetails or instruments are null or empty
-                    lblValue.Text = "N/A";
-                    lblResultValue.Text = "N/A";
-                    lblResultPercent.Text = "N/A";
-                }
-            });
+                    if (accountCash != null)
+                    {
+                        // Map the data to the labels
+                        lblValue.Text = $"£{accountCash.Total}";
+                        lblResultPercent.Text = $"£{accountCash.Ppl}";
+                    }
+                    else
+                    {
+                        lblValue.Text = "problem: view log";
+                        lblResultPercent.Text = string.Empty;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logForm.LogError($"{Resources.Error_UpdateDisplayFailed} : {ex.Message}");
+            }
+        }
+        private void toolTip1_Popup(object sender, PopupEventArgs e)
+        {
+
+        }
+
+        private void logToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_logForm.Visible)
+            {
+                _logForm.Hide();
+            }
+            else
+            {
+                _logForm.Show();
+            }
+        }
+
+        private void refreshNowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _ = UpdateData();
+        }
+
+        private void lblLastRefreshed_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                contextMenuRefresh.Show(lblLastRefreshed, e.Location);
+            }
         }
     }
 }
